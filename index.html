@@ -28,19 +28,58 @@
         transition-property: background-color, border-color, color, fill, stroke;
         transition-duration: 300ms;
       }
+      
+      /* تخصيص الطباعة وتصدير PDF */
       @media print {
+        @page {
+          size: auto;
+          margin: 15mm;
+        }
+        
         .no-print {
           display: none !important;
         }
-        .print-only {
-          display: block !important;
-        }
-        body {
+        
+        /* إعادة ضبط التخطيط للطباعة */
+        html, body {
           background-color: white !important;
           color: black !important;
+          height: auto !important;
+          overflow: visible !important;
         }
-        .chart-container {
-          page-break-inside: avoid;
+        
+        #root, main {
+          height: auto !important;
+          overflow: visible !important;
+          display: block !important;
+          width: 100% !important;
+        }
+
+        /* منع انقسام العناصر في منتصف الصفحة */
+        section, .chart-container, table tr, footer {
+          page-break-inside: avoid !important;
+        }
+        
+        /* تحسين مظهر الجداول في الطباعة */
+        table {
+          width: 100% !important;
+          border-collapse: collapse !important;
+        }
+        
+        th, td {
+          border-bottom: 1px solid #eee !important;
+          padding: 8px !important;
+        }
+
+        /* ضمان ظهور الألوان في الخلفيات */
+        * {
+          -webkit-print-color-adjust: exact !important;
+          print-color-adjust: exact !important;
+        }
+        
+        /* إخفاء التمرير */
+        ::-webkit-scrollbar {
+          display: none;
         }
       }
     </style>

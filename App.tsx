@@ -79,7 +79,10 @@ const App: React.FC = () => {
     }
   };
 
-  const handlePrint = () => window.print();
+  const handlePrint = () => {
+    // التأكد من إيقاف أي انتقالات أو حركات قبل الطباعة
+    window.print();
+  };
 
   const handleSort = (key: string) => {
     let direction: 'asc' | 'desc' = 'asc';
@@ -114,7 +117,7 @@ const App: React.FC = () => {
     const tooltipColor = isDarkMode ? '#f8fafc' : '#1e293b';
 
     return (
-      <div key={id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 mb-6 h-96 transition-all hover:shadow-xl hover:border-blue-500/30">
+      <div key={id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 mb-6 h-96 transition-all hover:shadow-xl hover:border-blue-500/30 chart-container">
         <h3 className="text-lg font-black mb-6 text-gray-800 dark:text-slate-100 border-r-4 border-blue-500 pr-3">{title}</h3>
         <ResponsiveContainer width="100%" height="100%">
           {type.toLowerCase() === 'bar' ? (
@@ -327,7 +330,7 @@ const App: React.FC = () => {
         )}
 
         {report && !loading && (
-          <div className="max-w-5xl mx-auto space-y-16 animate-in slide-in-from-bottom-12 duration-1000 pb-32">
+          <div className="max-w-5xl mx-auto space-y-16 animate-in slide-in-from-bottom-12 duration-1000 pb-32 print:p-0">
             {/* Report Header */}
             <header className="flex flex-col md:flex-row justify-between items-end gap-10 border-b-2 border-slate-100 dark:border-slate-800 pb-12">
               <div className="flex-1 space-y-6">
@@ -374,7 +377,7 @@ const App: React.FC = () => {
                     <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">تفاصيل المؤشرات الرقمية</h2>
                     <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">Validated Data Grid</p>
                   </div>
-                  <div className="flex items-center gap-3 bg-blue-600/10 text-blue-600 dark:text-blue-400 px-5 py-2.5 rounded-2xl font-black text-[10px] border border-blue-100 dark:border-blue-900/30">
+                  <div className="flex items-center gap-3 bg-blue-600/10 text-blue-600 dark:text-blue-400 px-5 py-2.5 rounded-2xl font-black text-[10px] border border-blue-100 dark:border-blue-900/30 no-print">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
                     دعم الفرز التفاعلي
                   </div>
@@ -393,7 +396,7 @@ const App: React.FC = () => {
                            >
                              <div className="flex items-center justify-between gap-4">
                                <span className="transition-transform group-hover:translate-x-1">{key}</span>
-                               <span className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 group-hover:bg-blue-100 dark:group-hover:bg-slate-700 group-hover:text-blue-500'}`}>
+                               <span className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all no-print ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 group-hover:bg-blue-100 dark:group-hover:bg-slate-700 group-hover:text-blue-500'}`}>
                                  {isActive ? (
                                    sortConfig.direction === 'asc' ? (
                                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M5 15l7-7 7 7"/></svg>
@@ -460,7 +463,7 @@ const App: React.FC = () => {
                           <p className="font-black truncate text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{src.title}</p>
                           <p className="text-[10px] opacity-40 truncate font-mono mt-1 dark:text-slate-500">{src.url}</p>
                         </div>
-                        <div className="text-[10px] bg-slate-50 dark:bg-slate-800 px-4 py-1.5 rounded-full font-black text-slate-400 dark:text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-colors">
+                        <div className="text-[10px] bg-slate-50 dark:bg-slate-800 px-4 py-1.5 rounded-full font-black text-slate-400 dark:text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-colors whitespace-nowrap">
                           {src.date}
                         </div>
                       </a>

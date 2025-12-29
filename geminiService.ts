@@ -15,9 +15,10 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
     النطاق الزمني: ${config.timeRange}
     المقاييس المطلوبة: ${config.metrics.join(', ')}
     
-    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي"}
+    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق"}
 
     يجب أن يكون الرد بصيغة JSON فقط، مع تنظيف أي قيم شاذة وتقديم تحليل واقعي.
+    تأكد من أن جدول البيانات (tableData) يحتوي على أعمدة مفيدة مثل المؤشر، القيمة، الوحدة، ونسبة التغير.
   `;
 
   try {
@@ -27,7 +28,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        systemInstruction: "صمم التقرير بلغة عربية احترافية، استعمل أرقاماً دقيقة، وتأكد من أن البيانات قابلة للرسم البياني.",
+        systemInstruction: "صمم التقرير بلغة عربية احترافية، استعمل أرقاماً دقيقة، وتأكد من أن البيانات قابلة للرسم البياني. لا تترك كائنات فارغة في الـ JSON.",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -50,7 +51,8 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                       properties: {
                         label: { type: Type.STRING },
                         value: { type: Type.NUMBER }
-                      }
+                      },
+                      required: ["label", "value"]
                     }
                   }
                 },
@@ -59,7 +61,16 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
             },
             tableData: {
               type: Type.ARRAY,
-              items: { type: Type.OBJECT }
+              items: { 
+                type: Type.OBJECT,
+                properties: {
+                  "المؤشر": { type: Type.STRING },
+                  "القيمة": { type: Type.NUMBER },
+                  "الوحدة": { type: Type.STRING },
+                  "الحالة": { type: Type.STRING }
+                },
+                required: ["المؤشر", "القيمة"]
+              }
             },
             sources: {
               type: Type.ARRAY,
@@ -69,7 +80,8 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                   title: { type: Type.STRING },
                   url: { type: Type.STRING },
                   date: { type: Type.STRING }
-                }
+                },
+                required: ["title", "url", "date"]
               }
             }
           },
