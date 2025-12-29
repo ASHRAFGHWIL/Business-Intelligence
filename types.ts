@@ -30,6 +30,7 @@ export interface EtsyListing {
   shopName: string;
   price: string;
   url: string;
+  shopUrl?: string;
 }
 
 export interface EtsyKeyword {

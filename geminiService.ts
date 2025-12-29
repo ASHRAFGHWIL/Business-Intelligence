@@ -17,8 +17,8 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
 
     المهمة الإضافية: 
     1. حدد أفضل عشرة (10) متاجر متخصصة.
-    2. ابحث عن أعلى عشر (10) قوائم منتجات (Listings) مبيعاً على Etsy.
-    3. استخرج قائمة بالكلمات المفتاحية الأكثر بحثاً (Etsy SEO) في الوقت الفعلي لكل فئة فرعية في هذا التقرير (مثل: laser cut, wood patterns, svg files, decor, etc). حدد لكل كلمة: قوة البحث والمنافسة والفئة.
+    2. ابحث عن أعلى عشر (10) قوائم منتجات (Listings) مبيعاً على Etsy مع التأكد من جلب رابط المنتج المباشر (Direct Listing URL) ورابط الصفحة الرئيسية للمتجر (Shop Home Page URL).
+    3. استخرج قائمة بالكلمات المفتاحية الأكثر بحثاً (Etsy SEO) في الوقت الفعلي لكل فئة فرعية في هذا التقرير.
 
     يجب أن يكون الرد بصيغة JSON فقط.
   `;
@@ -30,7 +30,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        systemInstruction: "صمم التقرير بلغة عربية احترافية. ركز على تحسين محركات البحث (Etsy SEO) والبيانات السوقية. استخرج قائمة بالكلمات المفتاحية الأكثر طلباً.",
+        systemInstruction: "صمم التقرير بلغة عربية احترافية. تأكد من صحة الروابط لكل من قوائم المنتجات (Listings) وصفحات المتاجر الرئيسية (Shop URLs).",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -93,14 +93,14 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                   title: { type: Type.STRING },
                   shopName: { type: Type.STRING },
                   price: { type: Type.STRING },
-                  url: { type: Type.STRING }
+                  url: { type: Type.STRING },
+                  shopUrl: { type: Type.STRING }
                 },
-                required: ["title", "shopName", "url"]
+                required: ["title", "shopName", "url", "shopUrl"]
               }
             },
             topKeywords: {
               type: Type.ARRAY,
-              description: "الكلمات المفتاحية الأكثر بحثاً (Etsy SEO)",
               items: {
                 type: Type.OBJECT,
                 properties: {

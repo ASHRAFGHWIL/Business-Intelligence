@@ -126,21 +126,17 @@ const App: React.FC = () => {
             </div>
         </section>
 
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
-            ${report.charts.map(c => `
-                <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
-                    <h3 class="font-bold mb-4">${c.title}</h3>
-                </div>
-            `).join('')}
-        </section>
-
         <section class="bg-orange-600/5 dark:bg-orange-900/10 p-8 rounded-[2.5rem] border border-orange-100 dark:border-orange-900/30">
             <h2 class="text-2xl font-black mb-6">أعلى 10 قوائم مبيعات على Etsy</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               ${report.topEtsyListings?.map(e => `
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
                   <h4 class="font-black text-slate-800 dark:text-slate-100 truncate">${e.title}</h4>
-                  <p class="text-xs opacity-70">${e.shopName} • ${e.price}</p>
+                  <p class="text-xs opacity-70 mb-3">${e.shopName} • ${e.price}</p>
+                  <div class="flex gap-2">
+                    <a href="${e.url}" target="_blank" class="text-[10px] font-black bg-orange-600 text-white px-3 py-1.5 rounded-lg">عرض المنتج</a>
+                    <a href="${e.shopUrl}" target="_blank" class="text-[10px] font-black border border-slate-200 dark:border-slate-700 px-3 py-1.5 rounded-lg">رئيسية المتجر</a>
+                  </div>
                 </div>
               `).join('')}
             </div>
@@ -236,7 +232,7 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 transition-colors duration-500">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50 dark:bg-slate-950 transition-colors duration-500 font-cairo">
       {/* Side Control Panel */}
       <aside className="no-print w-full md:w-96 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-800 p-6 overflow-y-auto h-screen sticky top-0 shadow-xl z-20">
         <div className="flex items-center justify-between mb-8">
@@ -430,9 +426,28 @@ const App: React.FC = () => {
                       <span className="text-xs font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/40 px-3 py-1 rounded-full">الترتيب: {index + 1}</span>
                       <span className="text-sm font-black text-green-600">{listing.price}</span>
                     </div>
-                    <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 truncate mb-1">{listing.title}</h4>
-                    <p className="text-sm text-slate-500 font-bold mb-4 italic">{listing.shopName}</p>
-                    <a href={listing.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-black text-orange-500 hover:underline">عرض القائمة</a>
+                    <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 truncate mb-1" title={listing.title}>{listing.title}</h4>
+                    <p className="text-sm text-slate-500 font-bold mb-4 italic truncate">{listing.shopName}</p>
+                    <div className="flex flex-wrap gap-2 mt-auto">
+                      <a 
+                        href={listing.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="flex-1 text-center bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-black py-2 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95"
+                      >
+                        عرض المنتج
+                      </a>
+                      {listing.shopUrl && (
+                        <a 
+                          href={listing.shopUrl} 
+                          target="_blank" 
+                          rel="noopener noreferrer" 
+                          className="flex-1 text-center border-2 border-slate-100 dark:border-slate-800 hover:border-orange-200 dark:hover:border-orange-900 text-slate-600 dark:text-slate-300 text-[11px] font-black py-2 rounded-xl transition-all active:scale-95"
+                        >
+                          رئيسية المتجر
+                        </a>
+                      )}
+                    </div>
                   </div>
                 ))}
               </div>
