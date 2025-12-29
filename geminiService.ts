@@ -3,11 +3,10 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { ReportConfig, ReportData } from "./types";
 
 export const generateReport = async (config: ReportConfig): Promise<ReportData> => {
-  // إنشاء مثيل جديد في كل مرة لضمان استخدام أحدث مفتاح API من البيئة
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `
-    أنت خبير تقارير بيانات ومحلل أعمال. مهمتك إنشاء تقرير استقصائي دقيق.
+    أنت خبير تقارير بيانات ومحلل أعمال محترف. مهمتك إنشاء تقرير استقصائي دقيق وشامل.
     الموضوع: ${config.topic}
     الهدف: ${config.goal}
     الجمهور المستهدف: ${config.targetAudience}
@@ -15,10 +14,13 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
     النطاق الزمني: ${config.timeRange}
     المقاييس المطلوبة: ${config.metrics.join(', ')}
     
-    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق"}
+    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق عبر الإنترنت"}
 
-    يجب أن يكون الرد بصيغة JSON فقط، مع تنظيف أي قيم شاذة وتقديم تحليل واقعي.
-    تأكد من أن جدول البيانات (tableData) يحتوي على أعمدة مفيدة مثل المؤشر، القيمة، الوحدة، ونسبة التغير.
+    المهمة الإضافية: 
+    1. حدد أفضل عشرة (10) متاجر أو منصات متخصصة في المنتجات/الخدمات المطروحة في هذا التقرير داخل المنطقة المحددة.
+    2. ابحث عن أعلى عشر (10) قوائم منتجات (Listings) أو متاجر مبيعاً على منصة Etsy العالمية متخصصة في نفس موضوع التقرير والهدف الاستراتيجي.
+
+    يجب أن يكون الرد بصيغة JSON فقط.
   `;
 
   try {
@@ -28,7 +30,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        systemInstruction: "صمم التقرير بلغة عربية احترافية، استعمل أرقاماً دقيقة، وتأكد من أن البيانات قابلة للرسم البياني. لا تترك كائنات فارغة في الـ JSON.",
+        systemInstruction: "صمم التقرير بلغة عربية احترافية. استخرج بيانات دقيقة وقابلة للرسم. تأكد من تضمين قائمة بأفضل 10 متاجر متخصصة وقائمة بأفضل 10 قوائم Etsy مع تفاصيل العنوان، اسم المتجر، السعر، والرابط.",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -43,7 +45,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                 properties: {
                   id: { type: Type.STRING },
                   title: { type: Type.STRING },
-                  type: { type: Type.STRING, description: "Bar, Line, Pie, or Radar" },
+                  type: { type: Type.STRING },
                   data: {
                     type: Type.ARRAY,
                     items: {
@@ -66,10 +68,36 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                 properties: {
                   "المؤشر": { type: Type.STRING },
                   "القيمة": { type: Type.NUMBER },
-                  "الوحدة": { type: Type.STRING },
-                  "الحالة": { type: Type.STRING }
+                  "الوحدة": { type: Type.STRING }
                 },
                 required: ["المؤشر", "القيمة"]
+              }
+            },
+            topStores: {
+              type: Type.ARRAY,
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  name: { type: Type.STRING },
+                  specialization: { type: Type.STRING },
+                  rating: { type: Type.STRING },
+                  url: { type: Type.STRING }
+                },
+                required: ["name", "specialization"]
+              }
+            },
+            topEtsyListings: {
+              type: Type.ARRAY,
+              description: "أعلى 10 قوائم مبيعات على Etsy",
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  title: { type: Type.STRING },
+                  shopName: { type: Type.STRING },
+                  price: { type: Type.STRING },
+                  url: { type: Type.STRING }
+                },
+                required: ["title", "shopName", "url"]
               }
             },
             sources: {
@@ -85,14 +113,13 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
               }
             }
           },
-          required: ["title", "summary", "methodology", "limitations", "charts", "tableData", "sources"]
+          required: ["title", "summary", "methodology", "charts", "tableData", "sources", "topStores", "topEtsyListings"]
         }
       }
     });
 
     const reportContent = JSON.parse(response.text || "{}") as ReportData;
 
-    // استخراج مصادر البحث من Grounding Metadata إذا توفرت
     const groundingChunks = response.candidates?.[0]?.groundingMetadata?.groundingChunks;
     if (groundingChunks) {
       const searchSources = groundingChunks
@@ -110,7 +137,6 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
     if (error.message?.includes("Requested entity was not found")) {
       throw new Error("KEY_NOT_FOUND");
     }
-    console.error("Gemini API Error:", error);
     throw new Error(error.message || "فشل في استدعاء واجهة برمجة التطبيقات.");
   }
 };

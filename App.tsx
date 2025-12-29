@@ -10,7 +10,6 @@ import { ReportConfig, ReportData } from './types';
 const COLORS = ['#3b82f6', '#10b981', '#f59e0b', '#ef4444', '#8b5cf6', '#ec4899'];
 
 const App: React.FC = () => {
-  // تهيئة الحالة بناءً على التفضيلات المخزنة أو تفضيلات النظام
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     if (savedTheme) return savedTheme === 'dark';
@@ -18,14 +17,14 @@ const App: React.FC = () => {
   });
 
   const [config, setConfig] = useState<ReportConfig>({
-    topic: 'تحليل الاقتصاد الرقمي في المملكة العربية السعودية 2025',
-    goal: 'قياس أثر رؤية 2030 على التحول الرقمي',
-    targetAudience: 'المستثمرون وصناع القرار',
+    topic: 'تحليل الملفات الرقمية علي منصة إتسي المتخصصة في الليزر كات الخشبي',
+    goal: 'تحديد القوالب الأكثر طلباً وتحليل استراتيجيات التسعير وتحديد فجوات السوق',
+    targetAudience: 'المصممون وأصحاب ورش قص الليزر والمستثمرون في المنتجات الرقمية',
     dataType: 'web',
     rawData: '',
-    timeRange: '2020-2025',
-    region: 'المملكة العربية السعودية',
-    metrics: ['النمو السنوي', 'حجم الاستثمار', 'عدد الشركات الناشئة'],
+    timeRange: '2024-2025',
+    region: 'العالمية (منصة Etsy)',
+    metrics: ['حجم المبيعات الشهري', 'متوسط سعر الملف', 'نسبة التقييمات الإيجابية'],
     chartTypes: ['Bar', 'Line', 'Pie'],
     language: 'Arabic'
   });
@@ -39,7 +38,6 @@ const App: React.FC = () => {
     direction: 'asc',
   });
 
-  // مزامنة فئة dark مع عنصر html وتحديث التخزين المحلي
   useEffect(() => {
     const root = window.document.documentElement;
     if (isDarkMode) {
@@ -79,9 +77,115 @@ const App: React.FC = () => {
     }
   };
 
-  const handlePrint = () => {
-    // التأكد من إيقاف أي انتقالات أو حركات قبل الطباعة
-    window.print();
+  const handlePrint = () => window.print();
+
+  const handleExportHTML = () => {
+    if (!report) return;
+
+    const htmlContent = `
+<!DOCTYPE html>
+<html lang="ar" dir="rtl" class="${isDarkMode ? 'dark' : ''}">
+<head>
+    <meta charset="UTF-8">
+    <title>${report.title}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Cairo', sans-serif; }
+        @media print { .no-print { display: none; } section { page-break-inside: avoid; } }
+    </style>
+    <script>
+        tailwind.config = { darkMode: 'class' };
+    </script>
+</head>
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 p-8">
+    <div class="max-w-5xl mx-auto space-y-12">
+        <header class="border-b-2 border-slate-100 dark:border-slate-800 pb-8">
+            <h1 class="text-4xl font-black mb-4">${report.title}</h1>
+            <p class="text-slate-500">${config.region} | ${new Date().toLocaleDateString('ar-EG')}</p>
+        </header>
+        
+        <section class="bg-white dark:bg-slate-900 p-8 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800">
+            <h2 class="text-2xl font-black mb-4 border-r-4 border-blue-600 pr-3">الملخص التنفيذي</h2>
+            <p class="leading-relaxed text-lg">${report.summary}</p>
+        </section>
+
+        <section class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            ${report.charts.map(c => `
+                <div class="bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800">
+                    <h3 class="font-bold mb-4">${c.title}</h3>
+                    <div class="text-sm text-slate-400 italic">بيانات تم تحليلها لمؤشر ${c.title}</div>
+                </div>
+            `).join('')}
+        </section>
+
+        <section class="bg-blue-600/5 dark:bg-blue-900/10 p-8 rounded-[2.5rem] border border-blue-100 dark:border-blue-900/30">
+            <h2 class="text-2xl font-black mb-6">أفضل 10 متاجر ومنصات متخصصة</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${report.topStores?.map(s => `
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                  <h4 class="font-black text-blue-600 dark:text-blue-400">${s.name}</h4>
+                  <p class="text-sm opacity-70">${s.specialization}</p>
+                </div>
+              `).join('')}
+            </div>
+        </section>
+
+        <section class="bg-orange-600/5 dark:bg-orange-900/10 p-8 rounded-[2.5rem] border border-orange-100 dark:border-orange-900/30">
+            <h2 class="text-2xl font-black mb-6">أعلى 10 قوائم مبيعات على Etsy</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              ${report.topEtsyListings?.map((e, idx) => `
+                <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
+                  <div class="text-xs font-bold text-orange-600 mb-1">Etsy Listing #${idx + 1}</div>
+                  <h4 class="font-black text-slate-800 dark:text-slate-100 truncate">${e.title}</h4>
+                  <p class="text-xs opacity-70">${e.shopName} • ${e.price || 'سعر متغير'}</p>
+                </div>
+              `).join('')}
+            </div>
+        </section>
+
+        <section class="bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 overflow-hidden">
+            <table class="w-full text-right">
+                <thead class="bg-slate-50 dark:bg-slate-800">
+                    <tr>
+                        ${report.tableData.length > 0 ? Object.keys(report.tableData[0]).map(k => `<th class="p-4 text-xs font-black">${k}</th>`).join('') : ''}
+                    </tr>
+                </thead>
+                <tbody>
+                    ${report.tableData.map(row => `
+                        <tr class="border-t border-slate-100 dark:border-slate-800">
+                            ${Object.values(row).map(v => `<td class="p-4 text-sm">${v}</td>`).join('')}
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        </section>
+
+        <footer class="grid grid-cols-1 md:grid-cols-2 gap-8 pt-8 border-t border-slate-200 dark:border-slate-800">
+            <div>
+                <h3 class="font-black mb-2">منهجية العمل</h3>
+                <p class="text-sm opacity-70">${report.methodology}</p>
+            </div>
+            <div>
+                <h3 class="font-black mb-2">المصادر</h3>
+                <ul class="text-xs space-y-1">
+                    ${report.sources.map(s => `<li><a href="${s.url}" class="text-blue-500 underline">${s.title}</a> (${s.date})</li>`).join('')}
+                </ul>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>`;
+
+    const blob = new Blob([htmlContent], { type: 'text/html' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Report_Digital_Laser_Files.html`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   };
 
   const handleSort = (key: string) => {
@@ -173,7 +277,7 @@ const App: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg font-black text-slate-900 dark:text-slate-100 leading-tight">خبير التقارير</h1>
-              <p className="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest">Business Intelligence</p>
+              <p className="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest">Digital Insights</p>
             </div>
           </div>
           
@@ -225,18 +329,6 @@ const App: React.FC = () => {
               </div>
             </div>
           </div>
-
-          {config.dataType === 'manual' && (
-            <div className="space-y-2 animate-in slide-in-from-top-2">
-              <label className="text-xs font-black text-slate-500 dark:text-slate-400 mr-1 uppercase tracking-wider">البيانات الخام</label>
-              <textarea 
-                className="w-full bg-slate-50 dark:bg-slate-800 border-2 border-transparent dark:border-slate-700 rounded-2xl p-4 h-32 text-xs font-mono focus:border-blue-500 dark:text-slate-100 outline-none shadow-inner"
-                value={config.rawData}
-                placeholder="أدخل البيانات هنا..."
-                onChange={(e) => setConfig({...config, rawData: e.target.value})}
-              />
-            </div>
-          )}
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -307,8 +399,8 @@ const App: React.FC = () => {
               </div>
             </div>
             <div className="space-y-3">
-              <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">جاهز لتحويل البيانات إلى استراتيجيات؟</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">اضبط الموضوع والهدف في لوحة التحكم للحصول على تقرير تحليلي معمق مدعوم بالبيانات الحية.</p>
+              <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">تحليل سوق الليزر الرقمي</h2>
+              <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">اكتشف القوالب الأكثر مبيعاً على Etsy وحلل استراتيجيات كبار المنافسين بضغطة زر.</p>
             </div>
           </div>
         )}
@@ -323,8 +415,8 @@ const App: React.FC = () => {
                 </div>
              </div>
              <div className="text-center space-y-3">
-               <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">جاري البحث والتحليل الرقمي...</p>
-               <p className="text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-xs">Deep Analysis & Web Grounding In Progress</p>
+               <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">جاري سحب بيانات Etsy وتحليلها...</p>
+               <p className="text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-xs">Laser Cut Market Research In Progress</p>
              </div>
           </div>
         )}
@@ -336,7 +428,7 @@ const App: React.FC = () => {
               <div className="flex-1 space-y-6">
                 <div className="inline-flex items-center gap-2.5 bg-blue-600 text-white text-xs font-black px-5 py-2 rounded-full shadow-xl shadow-blue-500/20">
                    <span className="w-2 h-2 bg-white rounded-full animate-pulse"></span>
-                   تقرير ذكاء أعمال معتمد
+                   تقرير تحليل التجارة الرقمية
                 </div>
                 <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter">{report.title}</h1>
                 <div className="flex flex-wrap gap-6 text-sm font-bold text-slate-400 dark:text-slate-500">
@@ -344,13 +436,22 @@ const App: React.FC = () => {
                   <span className="flex items-center gap-3 bg-white dark:bg-slate-900 px-4 py-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-sm"><svg className="w-5 h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2"><path d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 00-2 2z"/></svg>{new Date().toLocaleDateString('ar-EG')}</span>
                 </div>
               </div>
-              <button 
-                onClick={handlePrint}
-                className="no-print group flex items-center gap-4 bg-slate-900 dark:bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-2xl hover:shadow-blue-500/40"
-              >
-                <svg className="w-6 h-6 transition-transform group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h6z"/></svg>
-                تصدير PDF
-              </button>
+              <div className="flex flex-wrap gap-4 no-print">
+                <button 
+                  onClick={handleExportHTML}
+                  className="group flex items-center gap-4 bg-white dark:bg-slate-800 text-slate-900 dark:text-white px-8 py-5 rounded-[2rem] font-black text-sm transition-all hover:border-blue-500 border-2 border-slate-100 dark:border-slate-700 shadow-xl hover:shadow-blue-500/10 active:scale-95"
+                >
+                  <svg className="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                  تصدير HTML
+                </button>
+                <button 
+                  onClick={handlePrint}
+                  className="group flex items-center gap-4 bg-slate-900 dark:bg-blue-600 text-white px-10 py-5 rounded-[2rem] font-black text-sm transition-all hover:scale-105 active:scale-95 shadow-2xl hover:shadow-blue-500/40"
+                >
+                  <svg className="w-6 h-6 transition-transform group-hover:-translate-y-1" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 00-2 2h2m2 4h10a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h6z"/></svg>
+                  تصدير PDF
+                </button>
+              </div>
             </header>
 
             {/* Executive Summary Section */}
@@ -358,7 +459,7 @@ const App: React.FC = () => {
               <div className="absolute top-0 right-0 w-48 h-48 bg-blue-50/50 dark:bg-blue-900/10 rounded-bl-[6rem] transition-transform group-hover:scale-110 duration-700"></div>
               <h2 className="relative z-10 text-2xl font-black text-slate-900 dark:text-slate-100 mb-8 flex items-center gap-4">
                 <span className="w-3 h-12 bg-blue-600 rounded-full"></span>
-                الملخص التنفيذي
+                الملخص التحليلي
               </h2>
               <p className="relative z-10 text-slate-600 dark:text-slate-300 leading-[2.2] text-justify text-xl font-medium">
                 {report.summary}
@@ -370,16 +471,59 @@ const App: React.FC = () => {
                {report.charts.map(renderChart)}
             </section>
 
-            {/* Data Table Section with Enhanced Sorting */}
+            {/* Top 10 Etsy Listings Section */}
+            <section className="bg-orange-600/5 dark:bg-orange-900/10 p-12 rounded-[3.5rem] border border-orange-100 dark:border-orange-900/30">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-10 flex items-center gap-4">
+                <div className="w-12 h-12 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-orange-500/20">
+                  <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9.16 4h5.68l.8 2.08c.12.32.44.4.72.4.28 0 .56-.08.68-.4L17.84 4h2.24l-3.32 8.52 3.32 8.48h-2.24l-.8-2.08c-.12-.32-.4-.4-.68-.4-.28 0-.6.08-.72.4L14.84 21H9.16l-.8-2.08c-.12-.32-.4-.4-.68-.4-.28 0-.6.08-.72.4L6.16 21H3.92l3.32-8.48-3.32-8.52h2.24l.8 2.08c.12.32.44.4.72.4.28 0 .56-.08.68-.4L9.16 4z"/></svg>
+                </div>
+                أعلى 10 قوائم مبيعات (Listings) على Etsy
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {report.topEtsyListings?.map((listing, index) => (
+                  <div key={index} className="group bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-xs font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/40 px-3 py-1 rounded-full">تصنيف المبيعات: {index + 1}</span>
+                      {listing.price && <span className="text-sm font-black text-green-600 dark:text-green-400">{listing.price}</span>}
+                    </div>
+                    <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 mb-2 group-hover:text-orange-600 dark:group-hover:text-orange-400 transition-colors truncate" title={listing.title}>{listing.title}</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-bold mb-4 italic">اسم المتجر: {listing.shopName}</p>
+                    <a href={listing.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-2 text-xs font-black text-orange-500 hover:underline">
+                      عرض الملف الرقمي على Etsy
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"/></svg>
+                    </a>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Top 10 Stores Section */}
+            <section className="bg-blue-600/5 dark:bg-blue-900/10 p-12 rounded-[3.5rem] border border-blue-100 dark:border-blue-900/30">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-10 flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg shadow-blue-500/20">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                </div>
+                المنافسون المباشرون والمنصات المتخصصة
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                {report.topStores?.map((store, index) => (
+                  <div key={index} className="group bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+                    <div className="flex justify-between items-start mb-4">
+                      <span className="text-xs font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/40 px-3 py-1 rounded-full">مرتبة السوق: {index + 1}</span>
+                    </div>
+                    <h4 className="text-xl font-black text-slate-800 dark:text-slate-100 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{store.name}</h4>
+                    <p className="text-sm text-slate-500 dark:text-slate-400 font-medium leading-relaxed">{store.specialization}</p>
+                  </div>
+                ))}
+              </div>
+            </section>
+
+            {/* Data Table Section */}
             <section className="bg-white dark:bg-slate-900 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 shadow-2xl overflow-hidden">
                <div className="p-10 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/30 dark:bg-slate-800/20">
                   <div className="space-y-2">
-                    <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">تفاصيل المؤشرات الرقمية</h2>
-                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">Validated Data Grid</p>
-                  </div>
-                  <div className="flex items-center gap-3 bg-blue-600/10 text-blue-600 dark:text-blue-400 px-5 py-2.5 rounded-2xl font-black text-[10px] border border-blue-100 dark:border-blue-900/30 no-print">
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"></path></svg>
-                    دعم الفرز التفاعلي
+                    <h2 className="text-2xl font-black text-slate-900 dark:text-slate-100">تحليل مؤشرات المبيعات والأسعار</h2>
+                    <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em]">Detailed Market Metrics</p>
                   </div>
                </div>
                <div className="overflow-x-auto">
@@ -392,22 +536,9 @@ const App: React.FC = () => {
                            <th 
                              key={key} 
                              onClick={() => handleSort(key)}
-                             className={`group px-10 py-7 text-xs font-black uppercase tracking-widest cursor-pointer hover:bg-blue-50/50 dark:hover:bg-slate-800/60 transition-all select-none border-b-2 ${isActive ? 'text-blue-700 dark:text-blue-400 border-blue-600 bg-blue-50/30 dark:bg-slate-800/50' : 'text-slate-400 dark:text-slate-500 border-transparent'}`}
+                             className={`px-10 py-7 text-xs font-black uppercase tracking-widest cursor-pointer border-b-2 ${isActive ? 'text-blue-700 dark:text-blue-400 border-blue-600 bg-blue-50/30' : 'text-slate-400 border-transparent'}`}
                            >
-                             <div className="flex items-center justify-between gap-4">
-                               <span className="transition-transform group-hover:translate-x-1">{key}</span>
-                               <span className={`flex items-center justify-center w-8 h-8 rounded-xl transition-all no-print ${isActive ? 'bg-blue-600 text-white shadow-lg shadow-blue-500/20 scale-110' : 'bg-slate-100 dark:bg-slate-800 text-slate-300 dark:text-slate-600 group-hover:bg-blue-100 dark:group-hover:bg-slate-700 group-hover:text-blue-500'}`}>
-                                 {isActive ? (
-                                   sortConfig.direction === 'asc' ? (
-                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M5 15l7-7 7 7"/></svg>
-                                   ) : (
-                                      <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="3"><path d="M19 9l-7 7-7-7"/></svg>
-                                   )
-                                 ) : (
-                                   <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/></svg>
-                                 )}
-                               </span>
-                             </div>
+                             {key}
                            </th>
                          );
                        })}
@@ -415,15 +546,12 @@ const App: React.FC = () => {
                    </thead>
                    <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                      {sortedTableData.map((row, idx) => (
-                       <tr key={idx} className="group hover:bg-blue-50/20 dark:hover:bg-slate-800/30 transition-all border-r-4 border-transparent hover:border-blue-600">
-                         {Object.values(row).map((val: any, vIdx) => {
-                           const isNumber = typeof val === 'number';
-                           return (
-                             <td key={vIdx} className={`px-10 py-6 text-base font-bold transition-colors ${isNumber ? 'text-blue-900 dark:text-blue-300 font-black' : 'text-slate-600 dark:text-slate-400'} group-hover:text-blue-950 dark:group-hover:text-blue-100`}>
-                               {isNumber ? val.toLocaleString('ar-EG') : val}
-                             </td>
-                           );
-                         })}
+                       <tr key={idx} className="hover:bg-blue-50/10 dark:hover:bg-slate-800/30">
+                         {Object.values(row).map((val: any, vIdx) => (
+                           <td key={vIdx} className="px-10 py-6 text-base font-bold text-slate-600 dark:text-slate-400">
+                             {typeof val === 'number' ? val.toLocaleString('ar-EG') : val}
+                           </td>
+                         ))}
                        </tr>
                      ))}
                    </tbody>
@@ -434,38 +562,22 @@ const App: React.FC = () => {
             {/* Methodology and Sources Section */}
             <footer className="grid grid-cols-1 md:grid-cols-2 gap-14 pt-10 border-t border-slate-100 dark:border-slate-800">
                <div className="space-y-8">
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-100 dark:bg-blue-900/30 rounded-2xl flex items-center justify-center text-blue-600 dark:text-blue-400 shadow-sm"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg></div>
-                    منهجية إعداد التقرير
-                  </h3>
-                  <div className="relative p-8 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-inner">
-                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-bold italic opacity-80">
-                      {report.methodology}
-                    </p>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">منهجية تحليل السوق</h3>
+                  <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-inner">
+                    <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-bold italic opacity-80">{report.methodology}</p>
                   </div>
                </div>
                <div className="space-y-8">
-                  <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 rounded-2xl flex items-center justify-center text-indigo-600 dark:text-indigo-400 shadow-sm"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/></svg></div>
-                    المصادر والبيانات المرجعية
-                  </h3>
+                  <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">المصادر المرجعية</h3>
                   <div className="grid grid-cols-1 gap-4">
                     {report.sources.map((src, idx) => (
-                      <a 
-                        key={idx} 
-                        href={src.url} 
-                        target="_blank" 
-                        rel="noopener noreferrer"
-                        className="group flex items-center gap-5 p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:border-blue-500 dark:hover:border-blue-400 hover:shadow-xl hover:-translate-x-1"
-                      >
-                        <span className="w-10 h-10 bg-blue-50 dark:bg-blue-900/40 text-blue-600 dark:text-blue-400 rounded-2xl flex items-center justify-center font-black text-sm shadow-sm transition-transform group-hover:rotate-6">{idx + 1}</span>
+                      <a key={idx} href={src.url} target="_blank" rel="noopener noreferrer" className="flex items-center gap-5 p-5 bg-white dark:bg-slate-900 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm hover:border-blue-500 transition-all">
+                        <span className="w-10 h-10 bg-blue-50 dark:bg-blue-900/40 text-blue-600 rounded-2xl flex items-center justify-center font-black text-sm">{idx + 1}</span>
                         <div className="flex-1 min-w-0">
-                          <p className="font-black truncate text-slate-800 dark:text-slate-200 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">{src.title}</p>
+                          <p className="font-black truncate text-slate-800 dark:text-slate-200">{src.title}</p>
                           <p className="text-[10px] opacity-40 truncate font-mono mt-1 dark:text-slate-500">{src.url}</p>
                         </div>
-                        <div className="text-[10px] bg-slate-50 dark:bg-slate-800 px-4 py-1.5 rounded-full font-black text-slate-400 dark:text-slate-500 group-hover:bg-blue-600 group-hover:text-white transition-colors whitespace-nowrap">
-                          {src.date}
-                        </div>
+                        <div className="text-[10px] bg-slate-50 dark:bg-slate-800 px-4 py-1.5 rounded-full font-black text-slate-400">{src.date}</div>
                       </a>
                     ))}
                   </div>

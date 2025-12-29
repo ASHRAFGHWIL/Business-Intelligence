@@ -18,6 +18,20 @@ export interface ChartDataPoint {
   [key: string]: any;
 }
 
+export interface Store {
+  name: string;
+  specialization: string;
+  rating?: string;
+  url?: string;
+}
+
+export interface EtsyListing {
+  title: string;
+  shopName: string;
+  price: string;
+  url: string;
+}
+
 export interface ReportData {
   title: string;
   summary: string;
@@ -31,4 +45,6 @@ export interface ReportData {
   }[];
   tableData: any[];
   sources: { title: string; url: string; date: string }[];
+  topStores: Store[];
+  topEtsyListings: EtsyListing[];
 }
