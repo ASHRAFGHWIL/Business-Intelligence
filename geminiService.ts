@@ -6,19 +6,19 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `
-    أنت خبير تقارير بيانات ومحلل أعمال محترف. مهمتك إنشاء تقرير استقصائي دقيق وشامل.
+    أنت خبير تقارير بيانات ومحلل أعمال محترف متخصص في منصة Etsy. مهمتك إنشاء تقرير استقصائي دقيق وشامل.
     الموضوع: ${config.topic}
     الهدف: ${config.goal}
     الجمهور المستهدف: ${config.targetAudience}
     المنطقة: ${config.region}
     النطاق الزمني: ${config.timeRange}
-    المقاييس المطلوبة: ${config.metrics.join(', ')}
     
-    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق عبر الإنترنت"}
+    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق عبر الإنترنت وخرائط الكلمات المفتاحية لـ Etsy"}
 
     المهمة الإضافية: 
-    1. حدد أفضل عشرة (10) متاجر أو منصات متخصصة في المنتجات/الخدمات المطروحة في هذا التقرير داخل المنطقة المحددة.
-    2. ابحث عن أعلى عشر (10) قوائم منتجات (Listings) أو متاجر مبيعاً على منصة Etsy العالمية متخصصة في نفس موضوع التقرير والهدف الاستراتيجي.
+    1. حدد أفضل عشرة (10) متاجر متخصصة.
+    2. ابحث عن أعلى عشر (10) قوائم منتجات (Listings) مبيعاً على Etsy.
+    3. استخرج قائمة بالكلمات المفتاحية الأكثر بحثاً (Etsy SEO) في الوقت الفعلي لكل فئة فرعية في هذا التقرير (مثل: laser cut, wood patterns, svg files, decor, etc). حدد لكل كلمة: قوة البحث والمنافسة والفئة.
 
     يجب أن يكون الرد بصيغة JSON فقط.
   `;
@@ -30,7 +30,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        systemInstruction: "صمم التقرير بلغة عربية احترافية. استخرج بيانات دقيقة وقابلة للرسم. تأكد من تضمين قائمة بأفضل 10 متاجر متخصصة وقائمة بأفضل 10 قوائم Etsy مع تفاصيل العنوان، اسم المتجر، السعر، والرابط.",
+        systemInstruction: "صمم التقرير بلغة عربية احترافية. ركز على تحسين محركات البحث (Etsy SEO) والبيانات السوقية. استخرج قائمة بالكلمات المفتاحية الأكثر طلباً.",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -67,8 +67,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                 type: Type.OBJECT,
                 properties: {
                   "المؤشر": { type: Type.STRING },
-                  "القيمة": { type: Type.NUMBER },
-                  "الوحدة": { type: Type.STRING }
+                  "القيمة": { type: Type.NUMBER }
                 },
                 required: ["المؤشر", "القيمة"]
               }
@@ -88,7 +87,6 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
             },
             topEtsyListings: {
               type: Type.ARRAY,
-              description: "أعلى 10 قوائم مبيعات على Etsy",
               items: {
                 type: Type.OBJECT,
                 properties: {
@@ -98,6 +96,20 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
                   url: { type: Type.STRING }
                 },
                 required: ["title", "shopName", "url"]
+              }
+            },
+            topKeywords: {
+              type: Type.ARRAY,
+              description: "الكلمات المفتاحية الأكثر بحثاً (Etsy SEO)",
+              items: {
+                type: Type.OBJECT,
+                properties: {
+                  keyword: { type: Type.STRING },
+                  searchVolume: { type: Type.STRING },
+                  competition: { type: Type.STRING },
+                  category: { type: Type.STRING }
+                },
+                required: ["keyword", "searchVolume", "competition", "category"]
               }
             },
             sources: {
@@ -113,7 +125,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
               }
             }
           },
-          required: ["title", "summary", "methodology", "charts", "tableData", "sources", "topStores", "topEtsyListings"]
+          required: ["title", "summary", "methodology", "charts", "tableData", "sources", "topStores", "topEtsyListings", "topKeywords"]
         }
       }
     });

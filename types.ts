@@ -32,6 +32,13 @@ export interface EtsyListing {
   url: string;
 }
 
+export interface EtsyKeyword {
+  keyword: string;
+  searchVolume: string; // High, Medium, Low or numeric
+  competition: string;
+  category: string;
+}
+
 export interface ReportData {
   title: string;
   summary: string;
@@ -47,4 +54,5 @@ export interface ReportData {
   sources: { title: string; url: string; date: string }[];
   topStores: Store[];
   topEtsyListings: EtsyListing[];
+  topKeywords: EtsyKeyword[];
 }
