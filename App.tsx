@@ -111,27 +111,24 @@ const App: React.FC = () => {
         </section>
 
         <section class="bg-indigo-600/5 dark:bg-indigo-900/10 p-8 rounded-[2.5rem] border border-indigo-100 dark:border-indigo-900/30">
-            <h2 class="text-2xl font-black mb-6">Etsy SEO: الكلمات المفتاحية الأكثر بحثاً</h2>
+            <h2 class="text-2xl font-black mb-6">Etsy SEO: الكلمات الأكثر بحثاً</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
               ${report.topKeywords?.map(k => `
-                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                  <h4 class="font-black text-indigo-600 dark:text-indigo-400">#${k.keyword}</h4>
-                  <div class="mt-2 text-[10px] space-y-1 opacity-70">
-                    <p>البحث: ${k.searchVolume}</p>
-                    <p>المنافسة: ${k.competition}</p>
-                    <p>الفئة: ${k.category}</p>
-                  </div>
+                <div class="bg-white dark:bg-slate-900 p-4 rounded-2xl border border-slate-100 dark:border-slate-800">
+                  <h4 class="font-black text-indigo-600">#${k.keyword}</h4>
+                  <p class="text-[10px] opacity-70 mt-1">${k.searchVolume} | ${k.competition}</p>
                 </div>
               `).join('')}
             </div>
         </section>
 
         <section class="bg-orange-600/5 dark:bg-orange-900/10 p-8 rounded-[2.5rem] border border-orange-100 dark:border-orange-900/30">
-            <h2 class="text-2xl font-black mb-6">أعلى 10 قوائم مبيعات على Etsy</h2>
+            <h2 class="text-2xl font-black mb-6">أعلى 20 قائمة مبيعات على Etsy</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-              ${report.topEtsyListings?.map(e => `
+              ${report.topEtsyListings?.map((e, idx) => `
                 <div class="bg-white dark:bg-slate-900 p-5 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-                  <h4 class="font-black text-slate-800 dark:text-slate-100 truncate">${e.title}</h4>
+                  <div class="text-[10px] font-black text-orange-600">القائمة #${idx+1}</div>
+                  <h4 class="font-black text-slate-800 dark:text-slate-100 truncate mb-1">${e.title}</h4>
                   <p class="text-xs opacity-70 mb-3">${e.shopName} • ${e.price}</p>
                   <div class="flex gap-2">
                     <a href="${e.url}" target="_blank" class="text-[10px] font-black bg-orange-600 text-white px-3 py-1.5 rounded-lg">عرض المنتج</a>
@@ -154,7 +151,7 @@ const App: React.FC = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `Etsy_Market_Analysis_Report.html`;
+    a.download = `Etsy_Full_Analysis_Report.html`;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -191,7 +188,6 @@ const App: React.FC = () => {
     const gridColor = isDarkMode ? '#1e293b' : '#f1f5f9';
     const textColor = isDarkMode ? '#94a3b8' : '#64748b';
     const tooltipBg = isDarkMode ? '#0f172a' : '#ffffff';
-    const tooltipColor = isDarkMode ? '#f8fafc' : '#1e293b';
 
     return (
       <div key={id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 mb-6 h-96 transition-all hover:shadow-xl hover:border-blue-500/30 chart-container">
@@ -202,7 +198,7 @@ const App: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
               <XAxis dataKey="label" tick={{fontSize: 11, fill: textColor}} axisLine={false} tickLine={false} />
               <YAxis tick={{fontSize: 11, fill: textColor}} axisLine={false} tickLine={false} />
-              <Tooltip cursor={{fill: isDarkMode ? '#1e293b' : '#f8fafc'}} contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)', color: tooltipColor}} />
+              <Tooltip cursor={{fill: isDarkMode ? '#1e293b' : '#f8fafc'}} contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
               <Legend verticalAlign="top" height={36} iconType="circle" />
               <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} name="القيمة" />
             </BarChart>
@@ -211,9 +207,9 @@ const App: React.FC = () => {
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
               <XAxis dataKey="label" tick={{fill: textColor}} axisLine={false} tickLine={false} />
               <YAxis tick={{fill: textColor}} axisLine={false} tickLine={false} />
-              <Tooltip contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px', color: tooltipColor}} />
+              <Tooltip contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px'}} />
               <Legend verticalAlign="top" height={36} iconType="circle" />
-              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={4} dot={{ r: 6, fill: '#3b82f6', strokeWidth: 3, stroke: isDarkMode ? '#0f172a' : '#fff' }} activeDot={{ r: 8, strokeWidth: 0 }} name="التطور" />
+              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={4} dot={{ r: 6, fill: '#3b82f6', strokeWidth: 3, stroke: isDarkMode ? '#0f172a' : '#fff' }} name="التطور" />
             </LineChart>
           ) : (
             <PieChart>
@@ -242,7 +238,7 @@ const App: React.FC = () => {
             </div>
             <div>
               <h1 className="text-lg font-black text-slate-900 dark:text-slate-100 leading-tight">خبير التقارير</h1>
-              <p className="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest">Digital Insights</p>
+              <p className="text-[10px] text-blue-600 dark:text-blue-400 font-black uppercase tracking-widest">Etsy Intelligence</p>
             </div>
           </div>
           
@@ -291,7 +287,7 @@ const App: React.FC = () => {
             ) : (
               <>
                 <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-                توليد التقرير الذكي
+                توليد التقرير الذكي (20+ قائمة)
               </>
             )}
           </button>
@@ -318,7 +314,7 @@ const App: React.FC = () => {
             </div>
             <div className="space-y-3">
               <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 tracking-tight">تحليل سوق الليزر الرقمي على Etsy</h2>
-              <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">اكتشف الكلمات المفتاحية الأكثر طلباً وحلل مبيعات المنافسين في الوقت الفعلي.</p>
+              <p className="text-slate-500 dark:text-slate-400 text-lg font-medium leading-relaxed">اكتشف أفضل 20 قائمة مبيعات والكلمات المفتاحية الأكثر طلباً في الوقت الفعلي.</p>
             </div>
           </div>
         )}
@@ -329,7 +325,7 @@ const App: React.FC = () => {
                 <div className="w-32 h-32 border-[6px] border-blue-600 border-t-transparent rounded-full animate-spin"></div>
              </div>
              <div className="text-center space-y-3">
-               <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">جاري سحب بيانات Etsy SEO وتحليلها...</p>
+               <p className="text-2xl font-black text-slate-800 dark:text-slate-100 tracking-tight">جاري سحب 20 قائمة مبيعات وتحليل SEO...</p>
                <p className="text-slate-400 dark:text-slate-500 font-black uppercase tracking-widest text-xs">Laser Cut SEO Research In Progress</p>
              </div>
           </div>
@@ -341,7 +337,7 @@ const App: React.FC = () => {
             <header className="flex flex-col md:flex-row justify-between items-end gap-10 border-b-2 border-slate-100 dark:border-slate-800 pb-12">
               <div className="flex-1 space-y-6">
                 <div className="inline-flex items-center gap-2.5 bg-blue-600 text-white text-xs font-black px-5 py-2 rounded-full shadow-xl shadow-blue-500/20">
-                   تقرير تحليل التجارة الرقمية والـ SEO
+                   تحليل تجارة Etsy الرقمية
                 </div>
                 <h1 className="text-5xl md:text-6xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tighter">{report.title}</h1>
                 <div className="flex flex-wrap gap-6 text-sm font-bold text-slate-400 dark:text-slate-500">
@@ -396,28 +392,19 @@ const App: React.FC = () => {
                          <span className="opacity-50">المنافسة:</span>
                          <span className="text-orange-600 dark:text-orange-400">{k.competition}</span>
                        </div>
-                       <div className="flex justify-between text-[11px] font-bold">
-                         <span className="opacity-50">الفئة:</span>
-                         <span className="text-slate-900 dark:text-slate-100">{k.category}</span>
-                       </div>
                     </div>
                   </div>
                 ))}
               </div>
             </section>
 
-            {/* Charts Grid Section */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
-               {report.charts.map(renderChart)}
-            </section>
-
-            {/* Top 10 Etsy Listings Section */}
+            {/* Top 20 Etsy Listings Section */}
             <section className="bg-orange-600/5 dark:bg-orange-900/10 p-12 rounded-[3.5rem] border border-orange-100 dark:border-orange-900/30">
               <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-10 flex items-center gap-4">
                 <div className="w-12 h-12 bg-orange-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
                   <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24"><path d="M9.16 4h5.68l.8 2.08c.12.32.44.4.72.4.28 0 .56-.08.68-.4L17.84 4h2.24l-3.32 8.52 3.32 8.48h-2.24l-.8-2.08c-.12-.32-.4-.4-.68-.4-.28 0-.6.08-.72.4L14.84 21H9.16l-.8-2.08c-.12-.32-.4-.4-.68-.4-.28 0-.6.08-.72.4L6.16 21H3.92l3.32-8.48-3.32-8.52h2.24l.8 2.08c.12.32.44.4.72.4.28 0 .56-.08.68-.4L9.16 4z"/></svg>
                 </div>
-                أعلى 10 قوائم مبيعات مبيعاً (Real-Time)
+                أعلى 20 قائمة مبيعات مبيعاً (Real-Time)
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {report.topEtsyListings?.map((listing, index) => (
@@ -433,16 +420,16 @@ const App: React.FC = () => {
                         href={listing.url} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="flex-1 text-center bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-black py-2 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95"
+                        className="flex-1 text-center bg-orange-600 hover:bg-orange-700 text-white text-[11px] font-black py-2.5 rounded-xl shadow-lg shadow-orange-500/20 transition-all active:scale-95"
                       >
-                        عرض المنتج
+                        فتح رابط المنتج
                       </a>
                       {listing.shopUrl && (
                         <a 
                           href={listing.shopUrl} 
                           target="_blank" 
                           rel="noopener noreferrer" 
-                          className="flex-1 text-center border-2 border-slate-100 dark:border-slate-800 hover:border-orange-200 dark:hover:border-orange-900 text-slate-600 dark:text-slate-300 text-[11px] font-black py-2 rounded-xl transition-all active:scale-95"
+                          className="flex-1 text-center border-2 border-slate-100 dark:border-slate-800 hover:border-orange-200 dark:hover:border-orange-900 text-slate-600 dark:text-slate-300 text-[11px] font-black py-2.5 rounded-xl transition-all active:scale-95"
                         >
                           رئيسية المتجر
                         </a>
@@ -453,11 +440,16 @@ const App: React.FC = () => {
               </div>
             </section>
 
+            {/* Charts Grid Section */}
+            <section className="grid grid-cols-1 lg:grid-cols-2 gap-10">
+               {report.charts.map(renderChart)}
+            </section>
+
             {/* Methodology and Sources Section */}
             <footer className="grid grid-cols-1 md:grid-cols-2 gap-14 pt-10 border-t border-slate-100 dark:border-slate-800">
                <div className="space-y-8">
                   <h3 className="text-2xl font-black text-slate-900 dark:text-slate-100">منهجية التحليل</h3>
-                  <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800 shadow-inner">
+                  <div className="p-8 bg-slate-50 dark:bg-slate-900/50 rounded-[2.5rem] border-2 border-slate-100 dark:border-slate-800">
                     <p className="text-sm text-slate-500 dark:text-slate-400 leading-relaxed font-bold italic opacity-80">{report.methodology}</p>
                   </div>
                </div>

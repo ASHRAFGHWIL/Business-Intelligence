@@ -6,19 +6,21 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   
   const prompt = `
-    أنت خبير تقارير بيانات ومحلل أعمال محترف متخصص في منصة Etsy. مهمتك إنشاء تقرير استقصائي دقيق وشامل.
+    أنت خبير تقارير بيانات ومحلل أعمال محترف متخصص في تجارة Etsy الإلكترونية. مهمتك إنشاء تقرير استقصائي دقيق وشامل.
     الموضوع: ${config.topic}
     الهدف: ${config.goal}
     الجمهور المستهدف: ${config.targetAudience}
     المنطقة: ${config.region}
     النطاق الزمني: ${config.timeRange}
     
-    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق عبر الإنترنت وخرائط الكلمات المفتاحية لـ Etsy"}
+    البيانات المدخلة: ${config.rawData || "اعتمد على البحث الميداني الرقمي الموثوق عبر الإنترنت وخرائط الكلمات المفتاحية لـ Etsy لعام 2025"}
 
-    المهمة الإضافية: 
-    1. حدد أفضل عشرة (10) متاجر متخصصة.
-    2. ابحث عن أعلى عشر (10) قوائم منتجات (Listings) مبيعاً على Etsy مع التأكد من جلب رابط المنتج المباشر (Direct Listing URL) ورابط الصفحة الرئيسية للمتجر (Shop Home Page URL).
-    3. استخرج قائمة بالكلمات المفتاحية الأكثر بحثاً (Etsy SEO) في الوقت الفعلي لكل فئة فرعية في هذا التقرير.
+    المهمة الإضافية (بمنتهى الدقة): 
+    1. حدد أفضل عشرة (10) متاجر متخصصة في هذا المجال.
+    2. ابحث عن أعلى عشرين (20) قائمة منتجات (Listings) مبيعاً وحققت رواجاً (Bestsellers) على Etsy في الوقت الحالي. 
+       **شرط صارم**: يجب أن يكون الرابط (url) رابطاً كاملاً وصحيحاً يبدأ بـ https://www.etsy.com/listing/... وقابلاً للفتح مباشرة في المتصفح.
+       **شرط صارم**: يجب أن يكون رابط المتجر (shopUrl) رابطاً كاملاً وصحيحاً لصفحة المتجر الرئيسية.
+    3. استخرج قائمة بأهم الكلمات المفتاحية (Etsy SEO) في الوقت الفعلي.
 
     يجب أن يكون الرد بصيغة JSON فقط.
   `;
@@ -30,7 +32,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        systemInstruction: "صمم التقرير بلغة عربية احترافية. تأكد من صحة الروابط لكل من قوائم المنتجات (Listings) وصفحات المتاجر الرئيسية (Shop URLs).",
+        systemInstruction: "صمم التقرير بلغة عربية احترافية. تأكد بنسبة 100% أن الروابط (url و shopUrl) هي روابط حقيقية وصحيحة وقابلة للنقر والفتح في المتصفح. اطلب 20 قائمة مبيعات دقيقة.",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
@@ -87,6 +89,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
             },
             topEtsyListings: {
               type: Type.ARRAY,
+              description: "أعلى 20 قائمة مبيعات على Etsy",
               items: {
                 type: Type.OBJECT,
                 properties: {
