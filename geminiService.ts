@@ -20,7 +20,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
     2. ابحث عن أعلى عشرين (20) قائمة منتجات (Listings) مبيعاً وحققت رواجاً (Bestsellers) على Etsy في الوقت الحالي. 
        **شرط صارم**: يجب أن يكون الرابط (url) رابطاً كاملاً وصحيحاً يبدأ بـ https://www.etsy.com/listing/... وقابلاً للفتح مباشرة في المتصفح.
        **شرط صارم**: يجب أن يكون رابط المتجر (shopUrl) رابطاً كاملاً وصحيحاً لصفحة المتجر الرئيسية.
-    3. استخرج قائمة بأهم الكلمات المفتاحية (Etsy SEO) في الوقت الفعلي.
+    3. استخرج قائمة بأهم عشرين (20) كلمة مفتاحية (Etsy SEO) في الوقت الفعلي، مع توضيح حجم البحث والمنافسة لكل كلمة.
 
     يجب أن يكون الرد بصيغة JSON فقط.
   `;
@@ -32,7 +32,7 @@ export const generateReport = async (config: ReportConfig): Promise<ReportData> 
       config: {
         tools: [{ googleSearch: {} }],
         responseMimeType: "application/json",
-        systemInstruction: "صمم التقرير بلغة عربية احترافية. تأكد بنسبة 100% أن الروابط (url و shopUrl) هي روابط حقيقية وصحيحة وقابلة للنقر والفتح في المتصفح. اطلب 20 قائمة مبيعات دقيقة.",
+        systemInstruction: "صمم التقرير بلغة عربية احترافية. تأكد بنسبة 100% أن الروابط (url و shopUrl) هي روابط حقيقية وصحيحة وقابلة للنقر والفتح في المتصفح. اطلب 20 قائمة مبيعات و20 كلمة مفتاحية دقيقة لضمان أعلى جودة للبيانات.",
         responseSchema: {
           type: Type.OBJECT,
           properties: {

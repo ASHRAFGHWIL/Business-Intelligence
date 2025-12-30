@@ -32,55 +32,73 @@
       /* تخصيص الطباعة وتصدير PDF */
       @media print {
         @page {
-          size: auto;
-          margin: 15mm;
+          size: A4;
+          margin: 10mm;
         }
         
         .no-print {
           display: none !important;
         }
         
-        /* إعادة ضبط التخطيط للطباعة */
+        /* إعادة ضبط التخطيط للطباعة لإظهار المحتوى بالكامل */
         html, body {
           background-color: white !important;
           color: black !important;
           height: auto !important;
           overflow: visible !important;
+          width: 100%;
+          margin: 0;
+          padding: 0;
         }
         
-        #root, main {
+        #root {
+          height: auto !important;
+          overflow: visible !important;
+          display: block !important;
+        }
+
+        /* إلغاء الـ Flexbox و الـ Scroll في الـ Main أثناء الطباعة */
+        .flex, .flex-row, .flex-col {
+          display: block !important;
+        }
+
+        main {
           height: auto !important;
           overflow: visible !important;
           display: block !important;
           width: 100% !important;
+          padding: 0 !important;
+          margin: 0 !important;
         }
 
         /* منع انقسام العناصر في منتصف الصفحة */
-        section, .chart-container, table tr, footer {
+        section, .chart-container, table tr, footer, .listing-card {
           page-break-inside: avoid !important;
+          break-inside: avoid !important;
+          margin-bottom: 20px !important;
         }
         
-        /* تحسين مظهر الجداول في الطباعة */
-        table {
-          width: 100% !important;
-          border-collapse: collapse !important;
-        }
-        
-        th, td {
-          border-bottom: 1px solid #eee !important;
-          padding: 8px !important;
+        /* إخفاء أدوات التحكم في الرسوم البيانية أثناء الطباعة إذا لزم الأمر */
+        .recharts-brush {
+          display: none !important;
         }
 
         /* ضمان ظهور الألوان في الخلفيات */
         * {
           -webkit-print-color-adjust: exact !important;
           print-color-adjust: exact !important;
+          color-adjust: exact !important;
         }
         
         /* إخفاء التمرير */
         ::-webkit-scrollbar {
           display: none;
         }
+
+        /* تحسين العناوين للطباعة */
+        h1 { font-size: 24pt !important; }
+        h2 { font-size: 18pt !important; }
+        p { font-size: 12pt !important; }
       }
     </style>
   <script type="importmap">

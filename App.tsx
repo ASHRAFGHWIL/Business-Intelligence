@@ -2,7 +2,8 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { 
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, 
-  LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar 
+  LineChart, Line, PieChart, Pie, Cell, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar,
+  Brush
 } from 'recharts';
 import { generateReport } from './geminiService';
 import { ReportConfig, ReportData } from './types';
@@ -183,33 +184,64 @@ const App: React.FC = () => {
     return data;
   }, [report, sortConfig]);
 
+  const renderSortIcon = (columnKey: string) => {
+    const isActive = sortConfig.key === columnKey;
+    const direction = sortConfig.direction;
+
+    return (
+      <span className={`ml-2 inline-flex flex-col transition-opacity ${isActive ? 'opacity-100' : 'opacity-30 group-hover:opacity-60'}`}>
+        <svg 
+          className={`w-2.5 h-2.5 ${isActive && direction === 'asc' ? 'text-blue-600 dark:text-blue-400' : ''}`} 
+          fill="currentColor" viewBox="0 0 24 24"
+        >
+          <path d="M12 4l-8 8h16l-8-8z" />
+        </svg>
+        <svg 
+          className={`w-2.5 h-2.5 mt-0.5 ${isActive && direction === 'desc' ? 'text-blue-600 dark:text-blue-400' : ''}`} 
+          fill="currentColor" viewBox="0 0 24 24"
+        >
+          <path d="M12 20l8-8H4l8 8z" />
+        </svg>
+      </span>
+    );
+  };
+
   const renderChart = (chart: any) => {
     const { type, data, title, id } = chart;
     const gridColor = isDarkMode ? '#1e293b' : '#f1f5f9';
     const textColor = isDarkMode ? '#94a3b8' : '#64748b';
     const tooltipBg = isDarkMode ? '#0f172a' : '#ffffff';
+    const brushStroke = isDarkMode ? '#334155' : '#e2e8f0';
+    const brushFill = isDarkMode ? '#1e293b' : '#f8fafc';
 
     return (
-      <div key={id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 mb-6 h-96 transition-all hover:shadow-xl hover:border-blue-500/30 chart-container">
-        <h3 className="text-lg font-black mb-6 text-gray-800 dark:text-slate-100 border-r-4 border-blue-500 pr-3">{title}</h3>
-        <ResponsiveContainer width="100%" height="100%">
+      <div key={id} className="bg-white dark:bg-slate-900 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-slate-800 mb-6 h-[450px] transition-all hover:shadow-xl hover:border-blue-500/30 chart-container">
+        <div className="flex justify-between items-start mb-4">
+          <h3 className="text-lg font-black text-gray-800 dark:text-slate-100 border-r-4 border-blue-500 pr-3">{title}</h3>
+          {(type.toLowerCase() === 'bar' || type.toLowerCase() === 'line') && (
+            <span className="text-[10px] font-black text-blue-500 bg-blue-50 dark:bg-blue-900/20 px-2 py-1 rounded-md no-print">تفاعلي: اسحب للتكبير</span>
+          )}
+        </div>
+        <ResponsiveContainer width="100%" height="85%">
           {type.toLowerCase() === 'bar' ? (
-            <BarChart data={data}>
+            <BarChart data={data} margin={{ bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-              <XAxis dataKey="label" tick={{fontSize: 11, fill: textColor}} axisLine={false} tickLine={false} />
-              <YAxis tick={{fontSize: 11, fill: textColor}} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" tick={{fontSize: 10, fill: textColor}} axisLine={false} tickLine={false} />
+              <YAxis tick={{fontSize: 10, fill: textColor}} axisLine={false} tickLine={false} />
               <Tooltip cursor={{fill: isDarkMode ? '#1e293b' : '#f8fafc'}} contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)'}} />
-              <Legend verticalAlign="top" height={36} iconType="circle" />
-              <Bar dataKey="value" fill="#3b82f6" radius={[6, 6, 0, 0]} name="القيمة" />
+              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+              <Bar dataKey="value" fill="#3b82f6" radius={[4, 4, 0, 0]} name="القيمة" />
+              <Brush dataKey="label" height={30} stroke={brushStroke} fill={brushFill} travellerWidth={10} className="no-print" />
             </BarChart>
           ) : type.toLowerCase() === 'line' ? (
-            <LineChart data={data}>
+            <LineChart data={data} margin={{ bottom: 20 }}>
               <CartesianGrid strokeDasharray="3 3" vertical={false} stroke={gridColor} />
-              <XAxis dataKey="label" tick={{fill: textColor}} axisLine={false} tickLine={false} />
-              <YAxis tick={{fill: textColor}} axisLine={false} tickLine={false} />
+              <XAxis dataKey="label" tick={{fontSize: 10, fill: textColor}} axisLine={false} tickLine={false} />
+              <YAxis tick={{fontSize: 10, fill: textColor}} axisLine={false} tickLine={false} />
               <Tooltip contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px'}} />
-              <Legend verticalAlign="top" height={36} iconType="circle" />
-              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={4} dot={{ r: 6, fill: '#3b82f6', strokeWidth: 3, stroke: isDarkMode ? '#0f172a' : '#fff' }} name="التطور" />
+              <Legend verticalAlign="top" height={36} iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
+              <Line type="monotone" dataKey="value" stroke="#3b82f6" strokeWidth={3} dot={{ r: 4, fill: '#3b82f6', strokeWidth: 2, stroke: isDarkMode ? '#0f172a' : '#fff' }} name="التطور" />
+              <Brush dataKey="label" height={30} stroke={brushStroke} fill={brushFill} travellerWidth={10} className="no-print" />
             </LineChart>
           ) : (
             <PieChart>
@@ -219,7 +251,7 @@ const App: React.FC = () => {
                 ))}
               </Pie>
               <Tooltip contentStyle={{backgroundColor: tooltipBg, border: 'none', borderRadius: '12px'}} />
-              <Legend iconType="circle" />
+              <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
             </PieChart>
           )}
         </ResponsiveContainer>
@@ -398,6 +430,45 @@ const App: React.FC = () => {
               </div>
             </section>
 
+            {/* Detailed Data Table Section */}
+            <section className="bg-white dark:bg-slate-900 p-12 rounded-[3.5rem] border border-slate-100 dark:border-slate-800 shadow-xl overflow-hidden">
+              <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-10 flex items-center gap-4">
+                <div className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center shadow-lg">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" strokeWidth="2.5"><path d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                </div>
+                مؤشرات السوق التفصيلية
+              </h2>
+              
+              <div className="overflow-x-auto rounded-[2rem] border border-slate-100 dark:border-slate-800">
+                <table className="w-full text-right border-collapse">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-800/50">
+                      {['المؤشر', 'القيمة'].map((header) => (
+                        <th 
+                          key={header}
+                          onClick={() => handleSort(header)}
+                          className="group px-8 py-6 text-sm font-black text-slate-500 dark:text-slate-400 cursor-pointer select-none transition-colors hover:text-blue-600 dark:hover:text-blue-400"
+                        >
+                          <div className="flex items-center">
+                            {header}
+                            {renderSortIcon(header)}
+                          </div>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {sortedTableData.map((row, idx) => (
+                      <tr key={idx} className="hover:bg-blue-50/30 dark:hover:bg-blue-900/5 transition-colors group">
+                        <td className="px-8 py-5 text-sm font-bold text-slate-900 dark:text-slate-100">{row['المؤشر']}</td>
+                        <td className="px-8 py-5 text-sm font-black text-blue-600 dark:text-blue-400">{row['القيمة']?.toLocaleString('ar-EG')}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </section>
+
             {/* Top 20 Etsy Listings Section */}
             <section className="bg-orange-600/5 dark:bg-orange-900/10 p-12 rounded-[3.5rem] border border-orange-100 dark:border-orange-900/30">
               <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-10 flex items-center gap-4">
@@ -408,14 +479,14 @@ const App: React.FC = () => {
               </h2>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {report.topEtsyListings?.map((listing, index) => (
-                  <div key={index} className="group bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
+                  <div key={index} className="listing-card group bg-white dark:bg-slate-900 p-6 rounded-3xl border border-slate-100 dark:border-slate-800 shadow-sm transition-all hover:shadow-xl hover:-translate-y-1">
                     <div className="flex justify-between items-start mb-4">
                       <span className="text-xs font-black text-orange-600 dark:text-orange-400 bg-orange-50 dark:bg-orange-900/40 px-3 py-1 rounded-full">الترتيب: {index + 1}</span>
                       <span className="text-sm font-black text-green-600">{listing.price}</span>
                     </div>
                     <h4 className="text-lg font-black text-slate-800 dark:text-slate-100 truncate mb-1" title={listing.title}>{listing.title}</h4>
                     <p className="text-sm text-slate-500 font-bold mb-4 italic truncate">{listing.shopName}</p>
-                    <div className="flex flex-wrap gap-2 mt-auto">
+                    <div className="flex flex-wrap gap-2 mt-auto no-print">
                       <a 
                         href={listing.url} 
                         target="_blank" 
@@ -434,6 +505,10 @@ const App: React.FC = () => {
                           رئيسية المتجر
                         </a>
                       )}
+                    </div>
+                    <div className="hidden print:block mt-4 text-[8pt] text-slate-400 space-y-1">
+                      <p className="truncate">المنتج: {listing.url}</p>
+                      <p className="truncate">المتجر: {listing.shopUrl}</p>
                     </div>
                   </div>
                 ))}
